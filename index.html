@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آسان خرید | فروشگاه آنلاین</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- بنر اعلانات -->
+<div class="top-banner">
+    🎉 اعلانات تخفیف: امروز ۲۰٪ تخفیف روی تمام محصولات لباس! فرصت را از دست ندهید 🛍️
+</div>
+
+<!-- نوار کنترل بالا -->
+<div class="header-controls">
+    <div class="view-toggle">
+        <button class="view-btn active" data-mode="3d">✨ 3D</button>
+        <button class="view-btn" data-mode="2d">⚡ 2D</button>
+    </div>
+    <div class="announcement" id="announcementText">📢 اعلانات ویژه اینجا نمایش داده می‌شود</div>
+    <div></div>
+</div>
+
+<header>
+    <div class="header-top">
+        <div class="logo">🛒 آسان خرید</div>
+        <div class="user-area" id="userArea">
+            <button class="btn btn-sm btn-outline" id="loginBtn">ورود</button>
+            <button class="btn btn-sm btn-secondary" id="registerBtn">ثبت نام</button>
+        </div>
+    </div>
+    <nav>
+        <div class="nav-main">
+            <button class="nav-tab active" data-page="home">خانه</button>
+            <button class="nav-tab" data-page="sellers">لیست فروشندگان</button>
+            <button class="nav-tab" data-page="orders">سفارشات من</button>
+            <button class="nav-tab" id="rolePanelLink" style="display:none;">پنل من</button>
+        </div>
+        <div class="nav-sub" id="subNav" style="display:none;">
+            <button class="nav-sub-tab" data-sub="seller-panel">فروشنده</button>
+            <button class="nav-sub-tab" data-sub="delivery-panel">دلیور</button>
+        </div>
+    </nav>
+</header>
+
+<!-- صفحه اصلی -->
+<section id="home" class="page active">
+    <div class="welcome-box">
+        <h2>خوش آمدید به آسان خرید 👋</h2>
+        <p>بهترین و باکیفیت‌ترین محصولات را با قیمت مناسب از فروشندگان معتبر بخرید. سفارش شما سریع و ایمن به دستتان می‌رسد ✅</p>
+    </div>
+    <div class="home-container">
+        <div class="sidebar">
+            <h3>دسته‌بندی‌ها</h3>
+            <div class="category-list" id="categoryList">
+                <div class="category-item active" data-cat="all">همه محصولات</div>
+                <div class="category-item" data-cat="مردانه">👔 لباس مردانه</div>
+                <div class="category-item" data-cat="زنانه">👗 لباس زنانه</div>
+                <div class="category-item" data-cat="بچه">🧸 لباس بچه گانه</div>
+                <div class="category-item" data-cat="برقی">🔌 لوازم برقی</div>
+                <div class="category-item" data-cat="خانه">🏠 لوازم خانه</div>
+                <div class="category-item" data-cat="تکنالوژی">📱 تکنالوژی</div>
+            </div>
+        </div>
+        <div class="products-section">
+            <h2>محصولات</h2>
+            <div id="productGrid" class="product-grid mode-3d"></div>
+        </div>
+    </div>
+    <div class="cart-section" id="cartSection">
+        <h3>🛒 سبد خرید</h3>
+        <div id="cartItems"></div>
+        <div class="cart-total">مجموع: <span id="cartTotal">۰</span> افغانی</div>
+        <button class="btn checkout-btn" id="checkoutBtn">ثبت سفارش</button>
+    </div>
+</section>
+
+<!-- لیست فروشندگان -->
+<section id="sellers" class="page">
+    <div class="list-container">
+        <div class="list-header">
+            <h2>لیست فروشندگان</h2>
+            <div class="count-badge">تعداد: <span id="sellerCount">۲</span></div>
+        </div>
+        <div class="list-table">
+            <div class="list-row header-row">
+                <div class="col-name">نام فروشنده</div>
+                <div class="col-shop">نام فروشگاه</div>
+                <div class="col-phone">شماره تماس</div>
+                <div class="col-date">تاریخ ثبت</div>
+            </div>
+            <div class="list-row">
+                <div class="col-name">محمدی</div>
+                <div class="col-shop">فروشگاه لباس مردانه</div>
+                <div class="col-phone">۰۷۰۰ ۱۲۳ ۴۵۶</div>
+                <div class="col-date">۱۴۰۵/۰۷/۱۵</div>
+            </div>
+            <div class="list-row">
+                <div class="col-name">احمدی</div>
+                <div class="col-shop">فروشگاه لوازم خانه</div>
+                <div class="col-phone">۰۷۹۹ ۹۸۷ ۶۵۴</div>
+                <div class="col-date">۱۴۰۵/۰۸/۰۲</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- پنل فروشنده -->
+<section id="seller-panel" class="page">
+    <h2 class="panel-title">پنل فروشنده</h2>
+    <div class="card">
+        <h3>افزودن محصول جدید</h3>
+        <form id="addProductForm">
+            <input type="text" id="prodName" placeholder="نام محصول" required>
+            <input type="number" id="prodPrice" placeholder="قیمت (افغانی)" required>
+            <input type="number" id="prodDiscount" placeholder="قیمت تخفیفی (اختیاری)">
+            <select id="prodCategory" required>
+                <option value="">انتخاب دسته‌بندی</option>
+                <option value="مردانه">لباس مردانه</option>
+                <option value="زنانه">لباس زنانه</option>
+                <option value="بچه">لباس بچه گانه</option>
+                <option value="برقی">لوازم برقی</option>
+                <option value="خانه">لوازم خانه</option>
+                <option value="تکنالوژی">تکنالوژی</option>
+            </select>
+            <textarea id="prodDesc" placeholder="توضیحات محصول (اختیاری)" rows="3"></textarea>
+            <input type="file" id="prodImage" accept="image/*">
+            <button type="submit" class="btn btn-primary">افزودن محصول</button>
+        </form>
+    </div>
+    <div id="productMsg" class="message"></div>
+</section>
+
+<!-- پنل دلیور -->
+<section id="delivery-panel" class="page">
+    <h2 class="panel-title">پنل دلیور</h2>
+    <div class="card">
+        <h3>وضعیت سفارشات و تحویل</h3>
+        <p class="text-muted">لیست سفارشات آماده تحویل:</p>
+        <div id="deliveryOrdersList">
+            <p class="text-muted">در حال حاضر سفارشی برای تحویل موجود نیست.</p>
+        </div>
+    </div>
+</section>
+
+<!-- سفارشات من -->
+<section id="orders" class="page">
+    <h2 class="panel-title">سفارشات شما</h2>
+    <div id="ordersContainer">
+        <p class="text-muted">هنوز سفارشی ثبت نکرده‌اید.</p>
+    </div>
+</section>
+
+<!-- مودال ثبت‌نام -->
+<div id="registerModal" class="modal hidden">
+    <div class="modal-card">
+        <h3>ثبت نام</h3>
+        <div class="step-indicator">
+            <div class="step-dot active" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+        </div>
+        <div id="regStep1">
+            <select id="regRole" required>
+                <option value="">انتخاب نقش</option>
+                <option value="seller">فروشنده</option>
+                <option value="delivery">دلیور (مأمور تحویل)</option>
+            </select>
+            <input type="tel" id="regPhone" placeholder="شماره تماس شما" required>
+            <button class="btn btn-primary" id="sendCodeBtn">ارسال کد تأیید</button>
+        </div>
+        <div id="regStep2" class="hidden">
+            <p class="text-center">کد ۴ رقمی به شماره شما ارسال شد</p>
+            <input type="text" id="verifyCode" class="code-input" maxlength="4" placeholder="ــــ" required>
+            <div class="timer" id="codeTimer">کد را تا ۰۰:۶۰ وارد کنید</div>
+            <button class="btn btn-primary" id="verifyCodeBtn">تأیید کد</button>
+            <span class="resend-link" id="resendCodeBtn">ارسال مجدد کد</span>
+        </div>
+        <div id="regStep3" class="hidden">
+            <div id="sellerFields">
+                <input type="text" id="regFullName" placeholder="نام کامل" required>
+                <input type="text" id="regShopName" placeholder="نام فروشگاه" required>
+                <input type="text" id="regAddress" placeholder="آدرس فروشگاه" required>
+            </div>
+            <div id="deliveryFields" class="hidden">
+                <input type="text" id="regFullNameD" placeholder="نام و نام خانوادگی" required>
+                <input type="text" id="regRegion" placeholder="منطقه فعالیت شما" required>
+            </div>
+            <input type="password" id="regPassword" placeholder="انتخاب رمز (حداقل ۶ کاراکتر)" required>
+            <input type="password" id="regPassword2" placeholder="تکرار رمز" required>
+            <button class="btn btn-success" id="finalRegisterBtn">تکمیل ثبت نام</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال ورود -->
+<div id="loginModal" class="modal hidden">
+    <div class="modal-card">
+        <h3>ورود به حساب</h3>
+        <select id="loginRole" required>
+            <option value="">نقش شما</option>
+            <option value="seller">فروشنده</option>
+            <option value="delivery">دلیور</option>
+        </select>
+        <input type="text" id="loginId" placeholder="نام فروشگاه / نام" required>
+        <input type="tel" id="loginPhone" placeholder="شماره تماس" required>
+        <input type="password" id="loginPassword" placeholder="رمز عبور" required>
+        <button class="btn btn-primary" id="doLoginBtn">ورود</button>
+        <p class="text-center mt-2">حساب ندارید؟ <a href="#" id="goRegFromLogin">ثبت نام کنید</a></p>
+    </div>
+</div>
+
+<!-- مودال ثبت سفارش -->
+<div id="checkoutModal" class="modal hidden">
+    <div class="modal-card">
+        <h3>ثبت سفارش</h3>
+        <form id="checkoutForm">
+            <input type="text" id="custName" placeholder="نام و نام خانوادگی شما" required>
+            <input type="tel" id="custPhone" placeholder="شماره تماس" required>
+            <input type="text" id="custAddress" placeholder="آدرس کامل تحویل" required>
+            <textarea id="custNote" placeholder="توضیحات اضافی (اختیاری)" rows="2"></textarea>
+            <p class="font-bold mt-2">مجموع قابل پرداخت: <span id="finalTotal">۰</span> افغانی</p>
+            <button type="submit" class="btn btn-success">تأیید و ثبت سفارش</button>
+        </form>
+    </div>
+</div>
+
+<!-- چت -->
+<button class="chat-btn" id="chatToggleBtn">💬</button>
+<div class="chat-window hidden" id="chatWindow">
+    <div class="chat-header">
+        <span>پشتیبانی و دستیار هوشمند 🤖</span>
+        <button class="chat-close" id="chatCloseBtn">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="ai-quick-replies">
+        <button class="ai-reply-btn" data-q="نحوه ثبت سفارش">نحوه ثبت سفارش</button>
+        <button class="ai-reply-btn" data-q="هزینه تحویل">هزینه تحویل</button>
+        <button class="ai-reply-btn" data-q="زمان رسیدن سفارش">زمان تحویل</button>
+        <button class="ai-reply-btn" data-q="ثبت نام فروشنده">ثبت نام فروشنده</button>
+        <button class="ai-reply-btn" data-q="تغییر یا لغو سفارش">لغو سفارش</button>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" placeholder="پیام خود را بنویسید...">
+        <button class="chat-send-btn" id="chatSendBtn">ارسال</button>
+    </div>
+</div>
+
+<!-- بارگذاری اسکریپت‌ها -->
+<script src="js/app.js"></script>
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/chat-ai.js"></script>
+</body>
+</html>
