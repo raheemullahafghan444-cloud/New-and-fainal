@@ -1,31 +1,28 @@
 // ==========================================
-// مدیریت محصولات — کامل و بدون نقص
+// مدیریت محصولات — کامل و اصلاح شده
 // ==========================================
 const Products = {
     currentMode: localStorage.getItem('viewMode') || '3d',
     currentCategory: 'all',
-    items: [], // داده‌ها از گوگل شیت هم می‌آیند + داده‌های پیش‌فرض
+    items: [],
 
-    // داده‌های پیش‌فرض (تا اتصال گوگل شیت فعال شود)
     defaultItems: [
         { id: 1, name: 'پیراهن مردانه', price: 850, seller: 'فروشگاه نمونه', category: 'مردانه', icon: '👔' },
         { id: 2, name: 'شلوار زنانه', price: 650, seller: 'فروشگاه نمونه', category: 'زنانه', icon: '👗' },
         { id: 3, name: 'کفش ورزشی بچه', price: 1200, seller: 'فروشگاه ورزش', category: 'بچه', icon: '👟' },
         { id: 4, name: 'گوشی هوشمند', price: 8500, seller: 'تکنو شاپ', category: 'تکنالوژی', icon: '📱' },
-        { id: 5, name: 'چراغ میز', price: 350, seller: 'لوازم خانه روشن', category: 'خانه', icon: '💡' },
-        { id: 6, name: 'کابل شارژ', price: 120, seller: 'تکنو شاپ', category: 'تکنالوژی', icon: '🔌' }
     ],
 
     async init() {
         console.log('📦 بارگذاری محصولات...');
-        this.items = [...this.defaultItems]; // ابتدا داده‌های پیش‌فرض
+        this.items = [...this.defaultItems];
         this.setupViewMode();
         this.setupCategories();
-        await this.loadFromGoogleSheet(); // سپس از سرور
+        this.setupAddProductForm(); // ← فرم ثبت محصول
+        await this.loadFromGoogleSheet();
         this.render();
     },
 
-    // تغییر حالت نمایش 2D / 3D
     setupViewMode() {
         const buttons = document.querySelectorAll('.view-btn');
         buttons.forEach(btn => {
@@ -38,8 +35,6 @@ const Products = {
                 this.render();
             });
         });
-
-        // تنظیم اولیه
         const activeBtn = document.querySelector(`[data-mode="${this.currentMode}"]`);
         if (activeBtn) activeBtn.classList.add('active');
         this.updateGridClass();
@@ -50,15 +45,12 @@ const Products = {
         if (grid) grid.className = `product-grid mode-${this.currentMode}`;
     },
 
-    // انتخاب دسته‌بندی
     setupCategories() {
         const categoryList = document.getElementById('categoryList');
         if (!categoryList) return;
-
         categoryList.addEventListener('click', (e) => {
             const item = e.target.closest('.category-item');
             if (!item) return;
-            
             document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
             item.classList.add('active');
             this.currentCategory = item.dataset.cat;
@@ -66,10 +58,92 @@ const Products = {
         });
     },
 
-    // بارگذاری از گوگل شیت
+    // ✅ فرم افزودن محصول — اصلاح شده
+    setupAddProductForm() {
+        const form = document.getElementById('addProductForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // بررسی ورود کاربر
+            if (!window.Auth || !Auth.currentUser || Auth.currentUser.role !== 'seller') {
+                alert('⚠️ فقط فروشندگان می‌توانند محصول اضافه کنند! ابتدا وارد حساب خود شوید.');
+                return;
+            }
+
+            // گرفتن مقادیر
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseInt(document.getElementById('prodPrice').value);
+            const discount = document.getElementById('prodDiscount').value ? parseInt(document.getElementById('prodDiscount').value) : null;
+            const category = document.getElementById('prodCategory').value;
+            const desc = document.getElementById('prodDesc').value.trim();
+
+            if (!name || !price || !category) {
+                alert('لطفاً تمام فیلدهای الزامی را پر کنید!');
+                return;
+            }
+
+            const msgEl = document.getElementById('productMsg');
+            try {
+                if (!App.API_URL) {
+                    // حالت تست — بدون اتصال به سرور
+                    this.items.unshift({
+                        id: Date.now(),
+                        name: name,
+                        price: price,
+                        category: category,
+                        seller: Auth.currentUser.shop || 'من',
+                        icon: this.getIcon(category)
+                    });
+                    this.render();
+                    form.reset();
+                    msgEl.textContent = '✅ محصول اضافه شد (حالت تست)';
+                    msgEl.className = 'message success';
+                    setTimeout(() => msgEl.style.display = 'none', 4000);
+                    return;
+                }
+
+                // ارسال به سرور
+                const payload = {
+                    action: 'addProduct',
+                    name: name,
+                    price: price,
+                    category: category,
+                    sellerShop: Auth.currentUser.shop || Auth.currentUser.name,
+                    discountPrice: discount,
+                    description: desc
+                };
+
+                console.log('📤 ارسال محصول:', payload);
+
+                const res = await fetch(App.API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // به‌روزرسانی لیست
+                await this.loadFromGoogleSheet();
+                this.render();
+                form.reset();
+
+                msgEl.textContent = '✅ محصول با موفقیت ثبت شد!';
+                msgEl.className = 'message success';
+                setTimeout(() => msgEl.style.display = 'none', 4000);
+
+            } catch (err) {
+                console.error('❌ خطا:', err);
+                msgEl.textContent = '❌ خطا در ثبت محصول: ' + err.message;
+                msgEl.className = 'message error';
+            }
+        });
+    },
+
     async loadFromGoogleSheet() {
         if (!App.API_URL || App.API_URL === "") {
-            console.log('⚠️ آدرس سرور تنظیم نشده — از داده‌های پیش‌فرض استفاده می‌شود');
+            console.log('⚠️ آدرس API تنظیم نشده — از داده‌های محلی استفاده می‌شود');
             return;
         }
 
@@ -77,59 +151,49 @@ const Products = {
             const res = await fetch(`${App.API_URL}?action=getProducts`);
             const result = await res.json();
             
-            if (result.success && result.data) {
-                // ادغام داده‌های سرور با داده‌های پیش‌فرض
-                const serverItems = result.data.map((p, i) => ({
-                    id: 100 + i,
+            if (result.success && result.products) {
+                const serverItems = result.products.map((p, i) => ({
+                    id: 1000 + i,
                     name: p.name || 'نام نامشخص',
                     price: p.price || 0,
-                    seller: p.seller || 'فروشنده',
-                    category: p.category || 'همه',
+                    seller: p.sellerShop || 'فروشنده',
+                    category: p.category || 'عمومی',
                     icon: this.getIcon(p.category)
                 }));
                 this.items = [...serverItems, ...this.defaultItems];
-                console.log(`✅ ${serverItems.length} محصول از گوگل شیت دریافت شد`);
+                console.log(`✅ ${serverItems.length} محصول از سرور دریافت شد`);
             }
         } catch (err) {
-            console.log('❌ خطا در اتصال به گوگل شیت:', err.message);
+            console.log('❌ خطا در بارگذاری:', err.message);
         }
     },
 
-    // انتخاب آیکون بر اساس دسته‌بندی
     getIcon(category) {
         const icons = {
-            'مردانه': '👔',
-            'زنانه': '👗',
-            'بچه': '🧸',
-            'برقی': '🔌',
-            'خانه': '🏠',
-            'تکنالوژی': '📱'
+            'مردانه': '👔', 'زنانه': '👗', 'بچه': '🧸',
+            'برقی': '🔌', 'خانه': '🏠', 'تکنالوژی': '📱'
         };
         return icons[category] || '🛍️';
     },
 
-    // نمایش محصولات در صفحه
     render() {
         const grid = document.getElementById('productGrid');
         if (!grid) {
-            console.log('❌ المنت productGrid در HTML پیدا نشد!');
+            console.log('❌ productGrid پیدا نشد!');
             return;
         }
 
-        // فیلتر بر اساس دسته‌بندی
         const filtered = this.currentCategory === 'all'
             ? this.items
             : this.items.filter(p => p.category === this.currentCategory);
 
         if (!filtered.length) {
-            grid.innerHTML = `<p class="text-center" style="grid-column:1/-1;color:var(--gray)">هیچ محصولی در این دسته موجود نیست 😔</p>`;
+            grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--gray)">محصولی موجود نیست</p>`;
             return;
         }
 
-        // ساخت کارت‌ها
         grid.innerHTML = filtered.map(p => this.createCard(p)).join('');
         
-        // اتصال رویداد دکمه‌های «افزودن به سبد»
         grid.querySelectorAll('.add-to-cart').forEach(btn => {
             btn.addEventListener('click', () => {
                 const name = btn.dataset.name;
@@ -137,17 +201,16 @@ const Products = {
                 if (window.Cart && Cart.add) {
                     Cart.add({ name, price });
                 } else {
-                    alert('سبد خرید بارگذاری نشده! صفحه را مجدداً باز کنید.');
+                    alert('⚠️ سبد خرید آماده نیست، صفحه را بازخوانی کنید.');
                 }
             });
         });
     },
 
-    // ساخت کد HTML یک کارت محصول
     createCard(product) {
         if (this.currentMode === '2d') {
             return `
-                <div class="product-card" data-id="${product.id}">
+                <div class="product-card">
                     <div class="product-img">${product.icon}</div>
                     <div class="product-info">
                         <div class="product-name">${product.name}</div>
@@ -157,10 +220,8 @@ const Products = {
                 </div>
             `;
         }
-        
-        // حالت 3D
         return `
-            <div class="product-card" data-id="${product.id}">
+            <div class="product-card">
                 <div class="product-img">${product.icon}</div>
                 <div class="product-info">
                     <div class="product-name">${product.name}</div>
@@ -173,5 +234,4 @@ const Products = {
     }
 };
 
-// راه‌اندازی
 document.addEventListener('DOMContentLoaded', () => Products.init());
